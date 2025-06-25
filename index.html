@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Desafio Musical Completo</title>
+    <style>
+        /* --- GERAL --- */
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: linear-gradient(to bottom, #121212, #212121); /* Gradiente escuro */
+            color: #f0f0f0;
+            text-align: center;
+            padding: 20px;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        #container {
+            background: rgba(42, 42, 42, 0.8); /* Fundo semi-transparente */
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 5px 30px rgba(0, 0, 0, 0.7);
+            width: 90%;
+            max-width: 600px;
+            margin: auto;
+            box-sizing: border-box;
+        }
+
+        h1 {
+            color: #00bcd4; /* Azul Ciano */
+            font-size: 2.5em;
+            margin-bottom: 15px;
+        }
+
+        p {
+            color: #ddd;
+            font-size: 1.2em;
+            line-height: 1.5;
+            margin-bottom: 25px;
+        }
+
+        button {
+            padding: 18px 40px;
+            font-size: 1.3em;
+            font-weight: bold;
+            cursor: pointer;
+            border: none;
+            border-radius: 50px;
+            color: #121212; /* Texto escuro */
+            background-color: #aeea00; /* Verde Limão */
+            transition: background-color 0.3s;
+            margin: 15px; /* Espaçamento maior entre os botões */
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.5);
+        }
+
+        button:hover {
+            background-color: #99d100;
+        }
+
+        button:disabled {
+            background-color: #535353;
+            cursor: not-allowed;
+        }
+
+        /* --- START SCREEN --- */
+        #startScreen {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        #startScreen img {
+            max-width: 70%;
+            height: auto;
+            margin: 30px auto;
+            display: block;
+        }
+
+        /* --- GAME SCREEN --- */
+        #gameScreen {
+            display: none;
+            position: relative; /* Para posicionar o timer */
+        }
+
+        #gameScreen h2 {
+            font-size: 2em;
+            color: #00bcd4;
+            margin-bottom: 20px;
+        }
+
+        #level-container {
+            display: flex;
+            justify-content: center; /* Centraliza horizontalmente */
+            align-items: center; /* Centraliza verticalmente */
+            margin-bottom: 10px; /* Reduz a margem inferior */
+        }
+
+        #level-label {
+            text-transform: uppercase; /* Transforma em maiúsculas */
+            font-size: 1.5em; /* Tamanho da fonte do nível */
+            font-weight: bold;
+            color: #00bcd4; /* Cor do nível - Azul Ciano */
+            margin-right: 5px;
+        }
+
+        #level {
+            color: #00bcd4; /* Cor do nível - Azul Ciano */
+            font-size: 1.5em; /* Tamanho da fonte do nível */
+            font-weight: bold;
+        }
+
+        #progress-container {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 10px; /* Reduz a margem inferior */
+        }
+
+        .progress-square {
+            width: 25px;
+            height: 25px;
+            background-color: #444;
+            border: 1px solid #666;
+            border-radius: 5px;
+            transition: background-color 0.3s ease;
+        }
+
+        .progress-square.filled {
+            background-color: #00bcd4;
+            border-color: #00bcd4;
+        }
+
+        #noteImg {
+            width: 90%;
+            max-width: 400px;
+            height: auto;
+            margin: 20px auto;
+            background: #fff;
+            border-radius: 15px;
+            padding: 15px;
+            box-sizing: border-box;
+            display: block;
+        }
+
+        #timer {
+            font-size: 2.0em; /* Tamanho do timer */
+            font-weight: bold;
+            color: #F9A825;
+            position: absolute;
+            top: 10px; /* Ajuste a posição vertical */
+            right: 20px; /* Posiciona no canto superior direito */
+        }
+
+        #feedback {
+            font-size: 1.4em;
+            min-height: 50px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: 15px;
+        }
+
+        .feedback-acerto {
+            color: #81C784;
+        }
+
+        .feedback-erro {
+            color: #F44336;
+        }
+
+        #buttons-container {
+            display: flex; /* Usa flexbox */
+            flex-wrap: wrap; /* Permite que os botões quebrem para a próxima linha em telas menores */
+            justify-content: center; /* Centraliza os botões horizontalmente */
+            margin-top: 25px;
+            width: 100%; /* Garante que o container ocupe a largura total */
+            box-sizing: border-box; /* Importante para garantir que padding não ultrapasse a largura */
+        }
+
+        .note-button {
+            padding: 12px 20px; /* Ajusta o padding para dar um tamanho bom */
+            font-size: 1.0em; /* Reduz a fonte */
+            font-weight: bold;
+            cursor: pointer;
+            border-radius: 8px; /* Borda um pouco arredondada */
+            border: 2px solid #535353;
+            background-color: #2196F3; /* Azul */
+            color: #fff;
+            transition: background-color 0.2s, transform 0.1s;
+            text-align: center; /* Centraliza o texto horizontalmente */
+            margin: 0; /* Remove a margem */
+            margin-right: 2px; /* Adiciona uma pequena margem à direita para separação */
+        }
+
+        .note-button:last-child { /* Remove a margem do último botão */
+            margin-right: 0;
+        }
+
+        .note-button:hover {
+            background-color: #1976D2; /* Tom mais escuro ao passar o mouse */
+            transform: scale(1.05);
+        }
+
+        /* --- END SCREEN --- */
+        #endScreen {
+            display: none;
+        }
+
+        /* --- START SCREEN (MODERNIZADO) --- */
+        #startScreen #start-microphone-button {
+            background-color: #00bcd4; /* Azul Ciano - Cor do H1 */
+            color: white;
+            padding: 15px 32px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 4px 2px;
+            cursor: pointer;
+            border-radius: 12px;
+            box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2), 0 6px 20px 0 rgba(0,0,0,0.19);
+            transition: background-color 0.3s;
+        }
+
+        #startScreen #start-microphone-button:hover {
+            background-color: #00acc1; /* Tom mais escuro do azul ciano */
+        }
+
+        #startScreen #start-clicking-button {
+            background-color: #4CAF50; /* Verde */
+            color: white;
+            padding: 15px 32px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 4px 2px;
+            cursor: pointer;
+            border-radius: 12px;
+            box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2), 0 6px 20px 0 rgba(0,0,0,0.19);
+            transition: background-color 0.3s;
+        }
+
+        #startScreen #start-clicking-button:hover {
+            background-color: #3e8e41; /* Verde mais escuro no hover */
+        }
+    </style>
+</head>
+<body>
+<div id="container">
+    <div id="startScreen">
+        <h1>🎵 Desafio Musical</h1>
+        <img src="Clave_de_Sol.png" alt="Clave de Sol" style="max-width: 200px; margin: 10px auto;">
+        <p>Clave de Sol</p>
+        <p>Descubra qual é a nota indicada na pauta.<br>
+            Acerte as notas para avançar de fase.</p>
+        <button id="start-microphone-button">MICROFONE</button>
+        <button id="start-clicking-button">INICIAR</button>
+    </div>
+    <div id="gameScreen" style="display:none;">
+        <div id="timer">10</div>
+        <div id="level-container">
+            <span id="level-label">Nível</span> <p id="level">1</p>
+        </div>
+        <div id="progress-container"></div>
+        <img id="noteImg" src="" alt="Nota musical"/>
+        <p id="feedback"></p>
+        <!-- NOVO: Container para os botões -->
+        <div id="buttons-container"></div>
+    </div>
+    <div id="endScreen" style="display:none;">
+        <h1>🎉 Desafio Concluído!</h1>
+        <p>Parabéns, você é um mestre da leitura musical!</p>
+        <p id="finalScore">Sua pontuação: 0</p>
+        <p id="finalRecorde">Seu recorde: 0</p>
+    </div>
+</div>
+
+<script>
+    // --- CONFIGURAÇÃO COMPLETA DO JOGO ---
+    const NOTAS_GRAVES = ["do", "re", "mi", "fa", "sol", "la", "si"];
+    const NOTAS_AGUDAS = ["do8", "re8", "mi8", "fa8", "sol8", "la8", "si8", "do9"];
+    const NOTAS_SEMINIMAS = ["do", "re", "mi", "fa", "sol", "la", "si", "do8", "re8", "mi8", "fa8", "sol8", "la8", "si8", "do9", "re9"]; // Exemplo de notas com semínimas.
+    const NOTAS_COLCHEIAS = ["do", "re", "mi", "fa", "sol", "la", "si", "do8", "re8", "mi8", "fa8", "sol8", "la8", "si8", "do9", "re9"]; // Exemplo de notas com colcheias.
+    const FASES = [
+        {notas: ["do", "re"], requiredCorrectAnswers: 3, timer: 10}, // Nível 1
+        {notas: ["do", "re", "mi"], requiredCorrectAnswers: 5, timer: 10}, // Nível 2
+        {notas: ["do", "re", "mi", "fa"], requiredCorrectAnswers: 7, timer: 9}, // Nível 3
+        {notas: ["do", "re", "mi", "fa", "sol"], requiredCorrectAnswers: 7, timer: 8}, // Nível 4
+        {notas: ["do", "re", "mi", "fa", "sol, la"], requiredCorrectAnswers: 8, timer: 8}, // Nível 5
+        {notas: ["do", "re", "mi", "fa", "sol", "la", "si"], requiredCorrectAnswers: 9, timer: 7}, // Nível 6
+        {notas: [...NOTAS_GRAVES, "do8"], requiredCorrectAnswers: 9, timer: 7}, // Nível 7
+        {notas: ["do8", "re8"], requiredCorrectAnswers: 5, timer: 9}, // Nível 8
+        {notas: ["do8", "re8", "mi8"], requiredCorrectAnswers: 6, timer: 9}, // Nível 9
+        {notas: ["do8", "re8", "mi8", "fa8"], requiredCorrectAnswers: 7, timer: 8}, // Nível 10
+        {notas: ["do8", "re8", "mi8", "fa8", "sol8"], requiredCorrectAnswers: 8, timer: 8}, // Nível 11
+        {notas: ["do8", "re8", "mi8", "fa8", "sol8", "la8"], requiredCorrectAnswers: 9, timer: 7}, // Nível 12
+        {notas: ["do8", "re8", "mi8", "fa8", "sol8", "la8", "si8"], requiredCorrectAnswers: 9, timer: 7}, // Nível 13
+        {notas: [...NOTAS_AGUDAS], requiredCorrectAnswers: 10, timer: 6}, // Nível 14
+        {notas: [...NOTAS_GRAVES, ...NOTAS_AGUDAS], requiredCorrectAnswers: 10, timer: 6}, // Nível 15
+    ];
+
+    const IMAGENS = {
+        "do": "nota_do.png", "re": "nota_re.png", "mi": "nota_mi.png", "fa": "nota_fa.png", "sol": "nota_sol.png", "la": "nota_la.png", "si": "nota_si.png",
+        "do8": "nota_do8.png", "re8": "nota_re8.png", "mi8": "nota_mi8.png", "fa8": "nota_fa8.png", "sol8": "nota_sol8.png", "la8": "nota_la8.png", "si8": "nota_si8.png", "do9": "nota_do9.png"
+    };
+    const DISPLAY_NAMES = {
+        "do": "Dó", "re": "Ré", "mi": "Mi", "fa": "Fá", "sol": "Sol", "la": "Lá", "si": "Si",
+        "do8": "Dó", "re8": "Ré", "mi": "Mi", "fa8": "Fá", "sol8": "Sol", "la8": "Lá", "si8": "Si", "do9": "Dó"
+    };
+    const VARIACOES_NOTAS = {
+        "do": ["dó", "do", "nota dó", "nota do"],
+        "re": ["ré", "re", "nota ré", "nota re"],
+        "mi": ["mi", "me", "nota mi", "nota me"],
+        "fa": ["fá", "fa", "nota fá", "nota fa"],
+        "sol": ["sol", "só", "nota sol", "nota só"],
+        "la": ["lá", "la", "nota lá", "nota la"],
+        "si": ["si", "se", "nota si", "nota se"],
+        "do8": ["dó", "do", "nota dó", "nota do"],
+        "re8": ["ré", "re", "nota ré", "nota re"],
+        "mi8": ["mi", "me", "nota mi", "nota mi8"],
+        "fa8": ["fá", "fa", "nota fá", "nota fa"],
+        "sol8": ["sol", "só", "nota sol", "nota sol8"],
+        "la8": ["lá", "la", "nota lá", "nota la"],
+        "si8": ["si", "se", "nota si", "nota si8"],
+        "do9": ["dó", "do", "nota dó", "nota do9"]
+    };
+    // --- ELEMENTOS E VARIÁVEIS ---
+    const startScreen = document.getElementById('startScreen'), gameScreen = document.getElementById('gameScreen'), endScreen = document.getElementById('endScreen');
+    const h2Fase = gameScreen.querySelector('h2'), progressContainer = document.getElementById('progress-container');
+    const noteImg = document.getElementById('noteImg'), timerEl = document.getElementById('timer'), feedbackEl = document.getElementById('feedback'), buttonsContainer = document.getElementById('buttons-container');
+    const levelEl = document.getElementById('level');
+    const finalScoreEl = document.getElementById('finalScore'), finalRecordeEl = document.getElementById('finalRecorde');
+
+    let faseAtual = 0, acertosConsecutivos = 0, sequenciaDeNotas = [], timerInterval, jogoEmAndamento = false, reconhecimento, pontuacao = 0;
+    let recorde = localStorage.getItem('recorde') || 0; // Carrega o recorde do localStorage
+    finalRecordeEl.textContent = `Seu recorde: ${recorde}`;
+
+    // --- FUNÇÕES DE LÓGICA DO JOGO ---
+    function criarDeckBalanceado(notas, tamanho) {
+        const deck = [];
+        let i = 0;
+        while (deck.length < tamanho) {
+            deck.push(notas[i % notas.length]);
+            i++;
+        }
+        return deck;
+    }
+
+    function shuffle(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [array[i], array[j]] = [array[j], array[i]];
+        }
+        if (array.length > 1 && sequenciaDeNotas.length > 0 && array[0] === sequenciaDeNotas[9]) {
+            [array[0], array[1]] = [array[1], array[0]];
+        }
+        return array;
+    }
+
+    function prepararNovaSequencia() {
+        const fase = FASES[faseAtual];
+        const deck = criarDeckBalanceado(fase.notas, 10); // Usa as notas da fase
+        sequenciaDeNotas = shuffle(deck);
+    }
+
+    function levenshtein(a, b) {
+        if (a.length === 0) return b.length;
+        if (b.length === 0) return a.length;
+        const matrix = Array(b.length + 1).fill(null).map(() => Array(a.length + 1).fill(null));
+        for (let i = 0; i <= a.length; i++) matrix[0][i] = i;
+        for (let j = 0; j <= b.length; j++) matrix[j][0] = j;
+        for (let j = 1; j <= b.length; j++) {
+            for (let i = 1; i <= a.length; i++) {
+                const cost = a[i - 1] === b[j - 1] ? 0 : 1;
+                matrix[j][i] = Math.min(matrix[j][i - 1] + 1, matrix[j - 1][i] + 1, matrix[j - 1][i - 1] + cost);
+            }
+        }
+        return matrix[b.length][a.length];
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+        // Listener para o botão "Usar Microfone"
+        const startMicrophoneButton = document.getElementById('start-microphone-button');
+        startMicrophoneButton.addEventListener('click', () => {
+            if (SpeechRecognition) {
+                reconhecimento = new SpeechRecognition();
+                reconhecimento.lang = 'pt-BR';
+                reconhecimento.continuous = true;
+                reconhecimento.interimResults = false;
+
+                reconhecimento.onresult = (event) => {
+                    if (!jogoEmAndamento || acertosConsecutivos === -1) return;
+                    const respostaFalada = event.results[event.results.length - 1][0].transcript.toLowerCase().trim();
+                    processarResposta(respostaFalada);
+                };
+
+                reconhecimento.onstart = () => {
+                    console.log("Reconhecimento de voz iniciado.");
+                };
+
+                reconhecimento.onerror = (event) => {
+                    console.error("Erro no reconhecimento de voz: ", event.error);
+                };
+
+                reconhecimento.onend = () => {
+                    if (jogoEmAndamento) reconhecimento.start();
+                };
+
+                // Solicitar permissão do microfone
+                navigator.mediaDevices.getUserMedia({audio: true})
+                    .then(function (stream) {
+                        // Permissão concedida, iniciar o reconhecimento e o jogo
+                        console.log("Permissão do microfone concedida.");
+                        reconhecimento.start();
+                        iniciarJogo('microphone'); // Passa 'microphone' para indicar a origem
+                    })
+                    .catch(function (err) {
+                        // Permissão negada ou erro ao acessar o microfone
+                        console.warn("Microfone não detectado ou permissão negada. O jogo funcionará apenas com os botões.", err);
+                        startMicrophoneButton.innerHTML = "Microfone não detectado/permitido. Use os botões!";
+                        startMicrophoneButton.disabled = true; //Opcional: desabilita o botão para evitar novas tentativas inúteis
+                        iniciarJogo('buttons'); // Inicia o jogo mesmo sem permissão
+                    });
+            } else {
+                console.warn("Reconhecimento de voz não suportado neste navegador. O jogo funcionará apenas com os botões.");
+                startMicrophoneButton.innerHTML = "Navegador incompatível com o microfone. Use os botões!";
+                startMicrophoneButton.disabled = true; // Opcional: desabilita o botão
+                iniciarJogo('buttons'); // Inicia o jogo mesmo sem suporte
+            }
+        });
+
+        // Listener para o botão "Responder Clicando"
+        const startClickingButton = document.getElementById('start-clicking-button');
+        startClickingButton.addEventListener('click', () => {
+            iniciarJogo('buttons'); // Passa 'buttons' para indicar a origem
+        });
+
+        function iniciarJogo(modo) {
+            startScreen.style.display = 'none';
+            gameScreen.style.display = 'block';
+            jogoEmAndamento = true;
+            pontuacao = 0; // Zera a pontuação ao iniciar o jogo
+            iniciarFase();
+            if (modo === 'buttons' && reconhecimento) { // Para o reconhecimento se o jogo iniciar pelos botões
+                reconhecimento.stop();
+            }
+        }
+    });
+
+    function iniciarFase() {
+        const fase = FASES[faseAtual];
+        timerEl.textContent = fase.timer; //Define o tempo inicial
+        levelEl.textContent = faseAtual + 1;
+        acertosConsecutivos = 0;
+        criarPlacarDeProgresso();
+        renderizarBotoes(); // Renderiza os botões para a fase
+        prepararNovaSequencia();
+        proximaRodada();
+    }
+
+    function criarPlacarDeProgresso() {
+        progressContainer.innerHTML = '';
+        const fase = FASES[faseAtual];
+        for (let i = 0; i < fase.requiredCorrectAnswers; i++) { // Usa requiredCorrectAnswers
+            const square = document.createElement('div');
+            square.className = 'progress-square';
+            progressContainer.appendChild(square);
+        }
+    }
+
+    function atualizarProgresso() {
+        const squares = progressContainer.querySelectorAll('.progress-square');
+        squares.forEach((square, index) => {
+            square.classList.toggle('filled', index < acertosConsecutivos);
+        });
+    }
+
+    // NOVO: Renderiza os botões de acordo com as notas da fase
+    function renderizarBotoes() {
+        buttonsContainer.innerHTML = '';
+        const notas = ["do", "re", "mi", "fa", "sol", "la", "si"]; // Agora, sempre exibe Dó a Si
+
+        // Garante uma ordem lógica para os botões
+        const ordemNotas = ["do", "re", "mi", "fa", "sol", "la", "si"];
+        notas.sort((a, b) => ordemNotas.indexOf(a) - ordemNotas.indexOf(b));
+
+        // Cores para cada nota (mais claras)
+        const cores = {
+            "do": "#FFB3B3",  // Rosa claro
+            "re": "#FFDA61",  // Amarelo claro
+            "mi": "#90EE90",  // Verde claro
+            "fa": "#ADD8E6",  // Azul claro
+            "sol": "#B0C4DE", // LightSteelBlue
+            "la": "#D87093",  //  PaleVioletRed
+            "si": "#F0E68C"   // Khaki
+        };
+
+        for (const nota of notas) {
+            const btn = document.createElement('button');
+            btn.className = 'note-button';
+            btn.textContent = DISPLAY_NAMES[nota];
+            btn.dataset.nota = nota;
+            btn.onclick = (e) => processarResposta(e.target.dataset.nota);
+            // Adiciona estilo para os botões azuis
+            btn.style.backgroundColor = cores[nota];
+            btn.style.borderColor = '#000'; // Borda preta
+            btn.style.color = '#000'; // Texto preto
+            // Efeito de hover
+            btn.addEventListener('mouseover', () => {
+                btn.style.backgroundColor = '#1976D2'; // Tom mais escuro ao passar o mouse
+                btn.style.transform = 'scale(1.05)';
+            });
+            btn.addEventListener('mouseout', () => {
+                btn.style.backgroundColor = cores[nota]; // Volta à cor original
+                btn.style.transform = 'scale(1)';
+            });
+            buttonsContainer.appendChild(btn);
+        }
+    }
+
+    function proximaRodada() {
+        const notaCorreta = sequenciaDeNotas[acertosConsecutivos];
+        noteImg.src = IMAGENS[notaCorreta];
+        feedbackEl.textContent = "Fale ou clique na nota...";
+        feedbackEl.className = '';
+        iniciarTimer();
+    }
+
+    // Renomeada para processar tanto voz quanto cliques
+    function processarResposta(resposta) {
+        clearInterval(timerInterval);
+        const notaCorreta = sequenciaDeNotas[acertosConsecutivos];
+        let acertou = false;
+
+        // Lógica para comparar a resposta (voz ou clique)
+        const baseNotaCorreta = notaCorreta.replace(/[0-9]/g, '');
+        if (resposta === baseNotaCorreta) {
+            acertou = true; // Acerto direto por clique de botão
+        } else {
+            // Tenta o reconhecimento por voz com tolerância
+            const variacoesCorretas = VARIACOES_NOTAS[notaCorreta];
+            for (const variacao of variacoesCorretas) {
+                if (levenshtein(resposta, variacao) <= 1) {
+                    acertou = true;
+                    break;
+                }
+            }
+        }
+
+        if (acertou) {
+            acertosConsecutivos++;
+            pontuacao += 10; // Aumenta a pontuação
+            atualizarProgresso();
+            feedbackEl.textContent = "✅ Correto!";
+            feedbackEl.className = 'feedback-acerto';
+            const fase = FASES[faseAtual];
+            if (acertosConsecutivos >= fase.requiredCorrectAnswers) { // Verifica a quantidade necessária para passar de fase
+                feedbackEl.textContent = "🏆 Fase Concluída!";
+                acertosConsecutivos = -1; // Impede que continue contando acertos na fase atual
+                setTimeout(() => {
+                    faseAtual++;
+                    if (faseAtual >= FASES.length) {
+                        finalizarJogo();
+                    } else {
+                        iniciarFase();
+                    }
+                }, 2000);
+            } else {
+                setTimeout(proximaRodada, 1200);
+            }
+        } else {
+            acertosConsecutivos = 0;
+            pontuacao = 0; // Zera a pontuação ao errar
+            atualizarProgresso();
+            feedbackEl.innerHTML = `❌ Errado! Sequência perdida. Ouvi: "<b>${resposta}</b>"`;
+            feedbackEl.className = 'feedback-erro';
+            setTimeout(() => {
+                prepararNovaSequencia();
+                proximaRodada();
+            }, 2500);
+        }
+    }
+
+    function iniciarTimer() {
+        const fase = FASES[faseAtual];
+        let tempo = fase.timer;
+        timerEl.textContent = tempo;
+        clearInterval(timerInterval);
+        timerInterval = setInterval(() => {
+            tempo--;
+            timerEl.textContent = tempo;
+            if (tempo <= 0) {
+                clearInterval(timerInterval);
+                acertosConsecutivos = 0;
+                pontuacao = 0; // Zera a pontuação ao perder tempo
+                atualizarProgresso();
+                feedbackEl.textContent = "⏱️ Tempo Esgotado! Sequência perdida.";
+                feedbackEl.className = 'feedback-erro';
+                setTimeout(() => {
+                    prepararNovaSequencia();
+                    proximaRodada();
+                }, 2000);
+            }
+        }, 1000);
+    }
+
+    function finalizarJogo() {
+        jogoEmAndamento = false;
+        gameScreen.style.display = 'none';
+        endScreen.style.display = 'block';
+        finalScoreEl.textContent = `Sua pontuação: ${pontuacao}`;
+        if (pontuacao > recorde) {
+            recorde = pontuacao;
+            localStorage.setItem('recorde', recorde); // Salva o novo recorde no localStorage
+            finalRecordeEl.textContent = `Seu recorde: ${recorde}`;
+        } else {
+            finalRecordeEl.textContent = `Seu recorde: ${recorde}`;
+        }
+    }
+
+</script>
+</body>
+</html>
